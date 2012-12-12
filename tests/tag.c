@@ -4,9 +4,9 @@
 int
 main()
 {
-	Suite * suite = suite_create("Tag");
+	Suite * suite = suite_create("libtag");
 	
-	suite_add_tcase(suite, get_list_testcase());
+	add_node_tests(suite);
 	
 	SRunner *suite_runner = srunner_create(suite);
 	srunner_run_all(suite_runner, CK_NORMAL);

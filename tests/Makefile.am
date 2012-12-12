@@ -1,7 +1,7 @@
 AM_CPPFLAGS = -I$(top_srcdir)/include
 
-TESTS = tag
-check_PROGRAMS = tag
-tag_SOURCES = tag.c list.c 
-tag_CFLAGS = @CHECK_CFLAGS@
-tag_LDADD = $(top_builddir)/src/libtag.la @CHECK_LIBS@
+TESTS = libtag
+check_PROGRAMS = libtag
+libtag_SOURCES = tag.c node.c 
+libtag_CFLAGS = @CHECK_CFLAGS@
+libtag_LDADD = $(top_builddir)/src/libtag.la @CHECK_LIBS@
