@@ -99,28 +99,99 @@ END_TEST
 
 
 
-START_TEST(test_node_set_null_property)
+START_TEST(test_node_get_non_existing_property)
 {
-	tag_node_set_prop(node, "foo", NULL);
-	const TagPropValue *value = tag_node_get_prop(node, "foo");
-	fail_unless(TagPropType_Object == value->type);
-	fail_unless(NULL == value->value.object);
+	fail_unless(NULL == tag_node_get_prop(node, "foo"));
 }
 END_TEST
 
 START_TEST(test_node_set_property)
 {
-	TagPropValue value = {TagPropType_Integer, 123},
-	             *value2;
-	tag_node_set_prop(node, "foo", & value);
-	value2 = tag_node_get_prop(node, "foo");
-	fail_unless(TagPropType_Integer == value2->type);
-	fail_unless(123 == value2->value.integer);
-
+	TagPropValue value = { TagPropType_Integer, 123 };
+	tag_node_set_prop(node, "foo", &value);
+	const TagPropValue *get_value = tag_node_get_prop(node, "foo");
+	fail_unless(NULL != get_value);
+	fail_unless(TagPropType_Integer, get_value->type);
+	fail_unless(123, get_value->value.integer);
 }
 END_TEST
 
+START_TEST(test_node_set_null_property)
+{
+	tag_node_set_prop(node, "foo", NULL);
+	const TagPropValue *get_value = tag_node_get_prop(node, "foo");
+	fail_unless(NULL != get_value);
+	fail_unless(TagPropType_Object == get_value->type);
+	fail_unless(NULL == get_value->value.object);
+}
+END_TEST
 
+START_TEST(test_node_set_several_properties)
+{
+	TagPropValue value = { TagPropType_Integer, 111 };
+	tag_node_set_prop(node, "foo", &value);
+	fail_unless(1 == tag_node_get_prop_count(node));
+
+	value.value.integer = 222;
+	tag_node_set_prop(node, "bar", &value);
+	fail_unless(2 == tag_node_get_prop_count(node));
+
+	value.value.integer = 333;
+	tag_node_set_prop(node, "baz", &value);
+	fail_unless(3 == tag_node_get_prop_count(node));
+
+	const TagPropValue *get_value = tag_node_get_prop(node, "foo");
+	fail_unless(111, get_value->value.integer);
+
+	get_value = tag_node_get_prop(node, "bar");
+	fail_unless(222, get_value->value.integer);
+
+	get_value = tag_node_get_prop(node, "baz");
+	fail_unless(333, get_value->value.integer);
+}
+END_TEST
+
+START_TEST(test_node_unset_non_existing_property)
+{
+	TagPropValue value = { TagPropType_Integer, 123 };
+	tag_node_set_prop(node, "foo", &value);
+	fail_unless(1 == tag_node_get_prop_count(node));
+	tag_node_unset_prop(node, "bar");
+	fail_unless(1 == tag_node_get_prop_count(node));
+}
+END_TEST
+
+START_TEST(test_node_unset_property)
+{
+	TagPropValue value = { TagPropType_Integer, 123 };
+	tag_node_set_prop(node, "foo", &value);
+	tag_node_unset_prop(node, "foo");
+	const TagPropValue *get_value = tag_node_get_prop(node, "foo");
+	fail_unless(NULL == get_value);
+}
+END_TEST
+
+START_TEST(test_node_unset_property_after_adding_several_ones)
+{
+	TagPropValue value = { TagPropType_Integer, 111 };
+	tag_node_set_prop(node, "foo", &value);
+
+	value.value.integer = 222;
+	tag_node_set_prop(node, "bar", &value);
+
+	value.value.integer = 333;
+	tag_node_set_prop(node, "baz", &value);
+
+	tag_node_unset_prop(node, "foo");
+	fail_unless(2 == tag_node_get_prop_count(node));
+
+	tag_node_unset_prop(node, "bar");
+	fail_unless(1 == tag_node_get_prop_count(node));
+
+	tag_node_unset_prop(node, "baz");
+	fail_unless(0 == tag_node_get_prop_count(node));
+}
+END_TEST
 
 void
 add_node_tests(Suite *suite)
@@ -142,10 +213,13 @@ add_node_tests(Suite *suite)
 	tcase = tcase_create("properties");
 	tcase_add_checked_fixture (tcase, node_setup, node_teardown);
 
-	tcase_add_test(tcase, test_node_empty);
-	tcase_add_test(tcase, test_node_set_null_property);
+	tcase_add_test(tcase, test_node_get_non_existing_property);
 	tcase_add_test(tcase, test_node_set_property);
+	tcase_add_test(tcase, test_node_set_null_property);
+	tcase_add_test(tcase, test_node_set_several_properties);
+	tcase_add_test(tcase, test_node_unset_non_existing_property);
+	tcase_add_test(tcase, test_node_unset_property);
+	tcase_add_test(tcase, test_node_unset_property_after_adding_several_ones);
 
 	suite_add_tcase(suite, tcase);
 }
-

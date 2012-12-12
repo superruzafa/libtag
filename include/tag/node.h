@@ -47,6 +47,9 @@ tag_node_get_prop(TagNode *node, const char *key);
 void
 tag_node_set_prop(TagNode *node, const char *key, const TagPropValue *value);
 
+void
+tag_node_unset_prop(TagNode *node, const char *key);
+
 int
 tag_node_has_prop(TagNode *node, const char *key);
 
